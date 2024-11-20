@@ -1,26 +1,46 @@
-int potPin = A0;  // Pin connected to the potentiometer
-int ledPin = 9;   // PWM pin connected to the LED
+// Define the pin numbers for the HC-SR04 Ultrasonic Sensor
+#define TRIG_PIN 9    // Trigger pin connected to digital pin 9
+#define ECHO_PIN 10   // Echo pin connected to digital pin 10
+
+// Define a variable for the distance
+long duration;
+int distance;
 
 void setup() {
-  pinMode(ledPin, OUTPUT);       // Set LED pin as OUTPUT
-  Serial.begin(9600);            // Initialize Serial Monitor (Optional)
+  // Start serial communication
+  Serial.begin(9600);
+
+  // Set the TRIG_PIN as an output and ECHO_PIN as an input
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+
+  // Print the header for the observation table
+  Serial.println("Distance Measurement using HC-SR04 Ultrasonic Sensor");
+  Serial.println("----------------------------------------------------");
+  Serial.println("Time (ms) | Actual Distance (cm) | Observed Distance (cm)");
 }
 
 void loop() {
-  // Read the potentiometer value
-  int potValue = analogRead(potPin);
+  // Send a pulse to the trigger pin to start the measurement
+  digitalWrite(TRIG_PIN, LOW);  // Ensure trigger pin is LOW
+  delayMicroseconds(2);          // Wait for 2 microseconds
+  digitalWrite(TRIG_PIN, HIGH); // Send a pulse to the trigger pin
+  delayMicroseconds(10);         // Wait for 10 microseconds
+  digitalWrite(TRIG_PIN, LOW);  // Stop sending pulse
 
-  // Map the potentiometer value (0-1023) to PWM range (0-255)
-  int brightness = map(potValue, 0, 1023, 0, 255);
+  // Measure the duration of the echo signal
+  duration = pulseIn(ECHO_PIN, HIGH);  // Measure the pulse duration on the echo pin
 
-  // Set the LED brightness
-  analogWrite(ledPin, brightness);
+  // Calculate the distance based on the duration of the pulse
+  distance = duration / 58.2;  // Distance in cm (speed of sound = 343 m/s)
 
-  // Print the values to Serial Monitor (Optional)
-  Serial.print("Potentiometer Value: ");
-  Serial.print(potValue);
-  Serial.print("\tLED Brightness: ");
-  Serial.println(brightness);
+  // Log the actual and observed data in the observation table
+  unsigned long currentTime = millis();  // Get the current time in milliseconds
+  Serial.print(currentTime);              // Print the current time
+  Serial.print(" | ");
+  Serial.print(distance);                 // Print the observed distance
+  Serial.println(" cm");
 
-  delay(100);  // Delay to stabilize readings
+  // Wait for a short period before taking the next measurement
+  delay(1000);  // Delay 1 second between readings
 }
