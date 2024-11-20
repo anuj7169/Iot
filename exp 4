@@ -1,35 +1,43 @@
-#include <DHT.h>                  // Include the DHT sensor library
+#include <DHT.h>  // Include the DHT sensor library
 
-#define DHTPIN 2                   // Pin where the DHT11 sensor is connected
-#define DHTTYPE DHT11              // Define the sensor type as DHT11
+// Define the type of DHT sensor (DHT11 or DHT22)
+#define DHTPIN 2         // Pin to which the DHT sensor is connected
+#define DHTTYPE DHT22    // Change to DHT11 if you're using a DHT11 sensor
 
-DHT dht(DHTPIN, DHTTYPE);         // Initialize DHT sensor
+DHT dht(DHTPIN, DHTTYPE);  // Create an instance of the DHT sensor
 
 void setup() {
-  Serial.begin(9600);             // Begin serial communication
-  dht.begin();                    // Initialize the DHT sensor
-  Serial.println("DHT11 Sensor Initialized");
+  // Initialize serial communication
+  Serial.begin(9600);
+
+  // Start the DHT sensor
+  dht.begin();
 }
 
 void loop() {
-  // Read the humidity and temperature values
-  float humidity = dht.readHumidity();
-  float temperature = dht.readTemperature(); // Temperature in Celsius
-  
-  // Check if reading failed
+  // Wait a few seconds between measurements
+  delay(2000);
+
+  // Read humidity and temperature values
+  float humidity = dht.readHumidity();        // Read humidity (as percentage)
+  float temperature = dht.readTemperature();  // Read temperature in Celsius
+
+  // Check if any reading failed
   if (isnan(humidity) || isnan(temperature)) {
     Serial.println("Failed to read from DHT sensor!");
     return;
   }
 
-  // Display the results on the Serial Monitor
+  // Convert temperature to Fahrenheit (optional)
+  float temperatureF = dht.readTemperature(true);  // Get temperature in Fahrenheit
+
+  // Print the results to the Serial Monitor
   Serial.print("Humidity: ");
   Serial.print(humidity);
   Serial.print(" %\t");
   Serial.print("Temperature: ");
   Serial.print(temperature);
-  Serial.println(" *C");
-
-  // Wait for a short time before taking another reading
-  delay(2000);  // Delay for 2 seconds
+  Serial.print(" *C\t");
+  Serial.print(temperatureF);
+  Serial.println(" *F");
 }
