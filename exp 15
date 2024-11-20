@@ -1,0 +1,35 @@
+import RPi.GPIO as GPIO
+import time
+
+# Set the GPIO mode (BCM or BOARD)
+GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
+
+# Define GPIO pins connected to LEDs
+LED1_PIN = 17
+LED2_PIN = 27
+
+# Set the GPIO pins as outputs
+GPIO.setup(LED1_PIN, GPIO.OUT)
+GPIO.setup(LED2_PIN, GPIO.OUT)
+
+# Function to blink LEDs
+def blink_leds():
+    while True:
+        GPIO.output(LED1_PIN, GPIO.HIGH)  # Turn on LED1
+        GPIO.output(LED2_PIN, GPIO.LOW)   # Turn off LED2
+        print("LED1 ON, LED2 OFF")
+        time.sleep(1)  # Wait for 1 second
+        
+        GPIO.output(LED1_PIN, GPIO.LOW)   # Turn off LED1
+        GPIO.output(LED2_PIN, GPIO.HIGH)  # Turn on LED2
+        print("LED1 OFF, LED2 ON")
+        time.sleep(1)  # Wait for 1 second
+
+# Exception handling to ensure clean GPIO cleanup
+try:
+    blink_leds()
+except KeyboardInterrupt:
+    print("Program interrupted by user")
+finally:
+    # Clean up GPIO pins
+    GPIO.cleanup()
