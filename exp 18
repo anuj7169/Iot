@@ -1,0 +1,89 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+// Define the OLED display size
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET    -1  // Reset pin is not used
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+void setup() {
+  // Initialize OLED display
+  if (!display.begin(SSD1306_I2C_ADDRESS, OLED_RESET)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;); // Infinite loop
+  }
+
+  display.display();
+  delay(2000);  // Wait for 2 seconds to allow screen to initialize
+
+  // Clear the display buffer
+  display.clearDisplay();
+  
+  // Display simple text
+  display.setTextSize(1);      
+  display.setTextColor(SSD1306_WHITE);  
+  display.setCursor(0,0);
+  display.print(F("Hello, World!"));
+  display.display();
+  delay(2000);
+  
+  // Inverted text
+  display.invertDisplay(true); 
+  display.setCursor(0, 20);
+  display.print(F("Inverted Text"));
+  display.display();
+  delay(2000);
+  
+  display.invertDisplay(false); // Reset to normal
+  display.clearDisplay();
+  
+  // Display numbers in different bases (Decimal and Hexadecimal)
+  display.setCursor(0, 0);
+  display.print(F("Decimal: "));
+  display.println(255, DEC);  // Decimal number 255
+  display.print(F("Hex: "));
+  display.println(255, HEX);   // Hexadecimal number 0xFF
+  display.display();
+  delay(2000);
+
+  // Scroll text horizontally
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print(F("Scrolling Text"));
+  display.display();
+  delay(1000);
+  display.startscrollright(0x00, 0x0F); // Scroll text to the right
+  delay(2000);
+  display.stopscroll();
+  
+  // Scroll text vertically
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print(F("Vertical Scroll"));
+  display.display();
+  delay(1000);
+  display.startscrollleft(0x00, 0x0F); // Scroll text to the left
+  delay(2000);
+  display.stopscroll();
+  
+  // Scroll part of the display (e.g., a rectangle)
+  display.clearDisplay();
+  display.drawRect(0, 0, 64, 32, SSD1306_WHITE);  // Draw a rectangle
+  display.display();
+  delay(1000);
+  display.startscrollright(0x00, 0x0F); // Scroll the rectangle
+  delay(2000);
+  display.stopscroll();
+  
+  // Display an image (Simple example: drawing a circle)
+  display.clearDisplay();
+  display.drawCircle(64, 32, 20, SSD1306_WHITE); // Draw a circle at (64, 32)
+  display.display();
+  delay(2000);
+}
+
+void loop() {
+  // Add more actions in the loop if needed.
+}
