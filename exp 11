@@ -1,0 +1,30 @@
+int IN1 = 7;   // IN1 pin of L298N
+int IN2 = 8;   // IN2 pin of L298N
+int ENA = 5;   // ENA pin of L298N (PWM capable)
+
+void setup() {
+  // Set control pins as OUTPUT
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENA, OUTPUT);
+}
+
+void loop() {
+  // Forward motion at 50% speed
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, 128);  // 50% duty cycle (0-255)
+  delay(2000);            // Run for 2 seconds
+
+  // Reverse motion at full speed
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, 255);  // Full speed
+  delay(2000);            // Run for 2 seconds
+
+  // Stop the motor
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, 0);    // Speed = 0
+  delay(2000);            // Wait for 2 seconds
+}
