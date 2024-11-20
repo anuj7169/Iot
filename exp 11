@@ -1,30 +1,78 @@
-int IN1 = 7;   // IN1 pin of L298N
-int IN2 = 8;   // IN2 pin of L298N
-int ENA = 5;   // ENA pin of L298N (PWM capable)
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+// Blynk Authentication Token (Replace with your own)
+char auth[] = "Your_Blynk_Auth_Token";
+
+// Access Point details (this will be used to set up the ESP in AP mode)
+char ssid[] = "ESP_AP";
+char pass[] = "12345678";  // AP Password
+
+// Pin Definitions for LEDs or Relays
+#define LED1_PIN 2  // Change pins as needed
+#define LED2_PIN 3
+#define LED3_PIN 4
+#define LED4_PIN 5
 
 void setup() {
-  // Set control pins as OUTPUT
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(ENA, OUTPUT);
+  // Initialize serial communication
+  Serial.begin(115200);
+
+  // Set LED pins as output
+  pinMode(LED1_PIN, OUTPUT);
+  pinMode(LED2_PIN, OUTPUT);
+  pinMode(LED3_PIN, OUTPUT);
+  pinMode(LED4_PIN, OUTPUT);
+  
+  // Start WiFi Access Point
+  WiFi.softAP(ssid, pass);  // Start the ESP as an AP with the given SSID and password
+
+  // Print the IP address of the ESP in AP mode
+  Serial.print("AP IP Address: ");
+  Serial.println(WiFi.softAPIP());
+
+  // Initialize Blynk
+  Blynk.begin(auth, ssid, pass);  // Connect to Blynk Cloud using the Blynk token and Wi-Fi credentials
 }
 
 void loop() {
-  // Forward motion at 50% speed
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  analogWrite(ENA, 128);  // 50% duty cycle (0-255)
-  delay(2000);            // Run for 2 seconds
+  // Run Blynk
+  Blynk.run();
+}
 
-  // Reverse motion at full speed
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
-  analogWrite(ENA, 255);  // Full speed
-  delay(2000);            // Run for 2 seconds
+// Blynk function to control LEDs or Relays via button widgets
+BLYNK_WRITE(V1) {
+  int pinValue = param.asInt();  // Read the button state (0 or 1)
+  if (pinValue == 1) {
+    digitalWrite(LED1_PIN, HIGH);  // Turn ON LED1
+  } else {
+    digitalWrite(LED1_PIN, LOW);   // Turn OFF LED1
+  }
+}
 
-  // Stop the motor
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-  analogWrite(ENA, 0);    // Speed = 0
-  delay(2000);            // Wait for 2 seconds
+BLYNK_WRITE(V2) {
+  int pinValue = param.asInt();  // Read the button state (0 or 1)
+  if (pinValue == 1) {
+    digitalWrite(LED2_PIN, HIGH);  // Turn ON LED2
+  } else {
+    digitalWrite(LED2_PIN, LOW);   // Turn OFF LED2
+  }
+}
+
+BLYNK_WRITE(V3) {
+  int pinValue = param.asInt();  // Read the button state (0 or 1)
+  if (pinValue == 1) {
+    digitalWrite(LED3_PIN, HIGH);  // Turn ON LED3
+  } else {
+    digitalWrite(LED3_PIN, LOW);   // Turn OFF LED3
+  }
+}
+
+BLYNK_WRITE(V4) {
+  int pinValue = param.asInt();  // Read the button state (0 or 1)
+  if (pinValue == 1) {
+    digitalWrite(LED4_PIN, HIGH);  // Turn ON LED4
+  } else {
+    digitalWrite(LED4_PIN, LOW);   // Turn OFF LED4
+  }
 }
