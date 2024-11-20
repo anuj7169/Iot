@@ -1,0 +1,81 @@
+#include <ESP8266WiFi.h>
+
+// Replace with your network credentials
+const char* ssid = "Your_SSID";
+const char* password = "Your_PASSWORD";
+
+// Define GPIO pins for LEDs or relays
+#define LED1 D1  // GPIO5
+#define LED2 D2  // GPIO4
+
+WiFiServer server(80); // Create a web server on port 80
+
+void setup() {
+  // Initialize Serial Monitor
+  Serial.begin(115200);
+  Serial.println();
+  Serial.println("Configuring WiFi...");
+
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.println("WiFi connected.");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+
+  // Start the server
+  server.begin();
+  Serial.println("Server started.");
+
+  // Set GPIO pins as output
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+
+  // Initialize LEDs or relays to off
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, LOW);
+}
+
+void loop() {
+  // Check if a client has connected
+  WiFiClient client = server.available();
+  if (!client) {
+    return;
+  }
+
+  Serial.println("New client connected.");
+  String request = client.readStringUntil('\r');
+  Serial.println("Request: " + request);
+  client.flush();
+
+  // Parse the request
+  if (request.indexOf("/LED1/ON") != -1) {
+    digitalWrite(LED1, HIGH);
+  } else if (request.indexOf("/LED1/OFF") != -1) {
+    digitalWrite(LED1, LOW);
+  } else if (request.indexOf("/LED2/ON") != -1) {
+    digitalWrite(LED2, HIGH);
+  } else if (request.indexOf("/LED2/OFF") != -1) {
+    digitalWrite(LED2, LOW);
+  }
+
+  // Generate the HTML response
+  String html = "HTTP/1.1 200 OK\r\n";
+  html += "Content-Type: text/html\r\n\r\n";
+  html += "<!DOCTYPE HTML><html>";
+  html += "<h1>ESP8266 Web Server</h1>";
+  html += "<p><a href=\"/LED1/ON\">Turn LED1 ON</a></p>";
+  html += "<p><a href=\"/LED1/OFF\">Turn LED1 OFF</a></p>";
+  html += "<p><a href=\"/LED2/ON\">Turn LED2 ON</a></p>";
+  html += "<p><a href=\"/LED2/OFF\">Turn LED2 OFF</a></p>";
+  html += "</html>";
+
+  // Send the response to the client
+  client.print(html);
+  delay(1);
+  Serial.println("Client disconnected.");
+}
