@@ -1,0 +1,53 @@
+#include <Wire.h> // Required for I2C communication
+#include <LiquidCrystal_I2C.h> // LCD Library for I2C LCD
+
+// Initialize the LCD, specifying the I2C address (0x27) and screen size (16x2)
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Pin for the LM35 sensor
+int lm35Pin = A0;
+
+void setup() {
+  // Begin serial communication at 9600 baud rate
+  Serial.begin(9600);
+
+  // Initialize the LCD
+  lcd.begin();
+  lcd.backlight(); // Turn on the LCD backlight
+
+  // Print a message to indicate the program is starting
+  lcd.print("Temp Sensor");
+  delay(2000); // Display for 2 seconds
+  lcd.clear();
+}
+
+void loop() {
+  // Read the value from the LM35 sensor
+  int sensorValue = analogRead(lm35Pin);
+
+  // Convert the sensor value to voltage (range: 0-5V)
+  float voltage = (sensorValue * 5.0) / 1024.0;
+
+  // Convert voltage to temperature in Celsius (1V = 10°C for LM35)
+  float temperatureC = voltage * 100;
+
+  // Optionally convert to Fahrenheit
+  float temperatureF = (temperatureC * 9.0) / 5.0 + 32;
+
+  // Print the values to the Serial Monitor
+  Serial.print("Temperature: ");
+  Serial.print(temperatureC);
+  Serial.print(" C, ");
+  Serial.print(temperatureF);
+  Serial.println(" F");
+
+  // Display the temperature on the LCD
+  lcd.clear();
+  lcd.setCursor(0, 0); // Set cursor to first row
+  lcd.print("Temp: ");
+  lcd.print(temperatureC);
+  lcd.print(" C");
+
+  // Wait for 1 second before reading again
+  delay(1000);
+}
