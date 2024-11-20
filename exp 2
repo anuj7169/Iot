@@ -1,53 +1,80 @@
-#include <Wire.h> // Required for I2C communication
-#include <LiquidCrystal_I2C.h> // LCD Library for I2C LCD
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
-// Initialize the LCD, specifying the I2C address (0x27) and screen size (16x2)
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+// OLED display width and height
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
 
-// Pin for the LM35 sensor
-int lm35Pin = A0;
+// Initialize OLED display with I2C address 0x3C
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+// LM35 sensor pin
+const int LM35_PIN = A0;
+
+// Function to read temperature in Celsius
+float readCelsius() {
+  int analogValue = analogRead(LM35_PIN);
+  float voltage = (analogValue / 1024.0) * 5.0; // Convert to voltage
+  return voltage * 100.0; // LM35 outputs 10mV per degree Celsius
+}
+
+// Function to convert Celsius to Fahrenheit
+float celsiusToFahrenheit(float celsius) {
+  return (celsius * 9.0 / 5.0) + 32.0;
+}
 
 void setup() {
-  // Begin serial communication at 9600 baud rate
+  // Initialize Serial Monitor
   Serial.begin(9600);
+  
+  // Initialize OLED display
+  if (!display.begin(SSD1306_I2C_ADDRESS, 0x3C)) {
+    Serial.println("OLED initialization failed!");
+    while (true);
+  }
+  display.clearDisplay();
+  display.display();
 
-  // Initialize the LCD
-  lcd.begin();
-  lcd.backlight(); // Turn on the LCD backlight
-
-  // Print a message to indicate the program is starting
-  lcd.print("Temp Sensor");
-  delay(2000); // Display for 2 seconds
-  lcd.clear();
+  // Print a start-up message
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+  display.println("Temperature Monitor");
+  display.display();
+  delay(2000);
 }
 
 void loop() {
-  // Read the value from the LM35 sensor
-  int sensorValue = analogRead(lm35Pin);
-
-  // Convert the sensor value to voltage (range: 0-5V)
-  float voltage = (sensorValue * 5.0) / 1024.0;
-
-  // Convert voltage to temperature in Celsius (1V = 10°C for LM35)
-  float temperatureC = voltage * 100;
-
-  // Optionally convert to Fahrenheit
-  float temperatureF = (temperatureC * 9.0) / 5.0 + 32;
-
-  // Print the values to the Serial Monitor
-  Serial.print("Temperature: ");
-  Serial.print(temperatureC);
-  Serial.print(" C, ");
-  Serial.print(temperatureF);
-  Serial.println(" F");
-
-  // Display the temperature on the LCD
-  lcd.clear();
-  lcd.setCursor(0, 0); // Set cursor to first row
-  lcd.print("Temp: ");
-  lcd.print(temperatureC);
-  lcd.print(" C");
-
-  // Wait for 1 second before reading again
-  delay(1000);
+  // Read temperature in Celsius
+  float tempC = readCelsius();
+  
+  // Convert to Fahrenheit
+  float tempF = celsiusToFahrenheit(tempC);
+  
+  // Display temperature on OLED
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("Temp Readings:");
+  display.setTextSize(2);
+  display.setCursor(0, 20);
+  display.print("C: ");
+  display.print(tempC);
+  display.println(" *C");
+  display.setCursor(0, 40);
+  display.print("F: ");
+  display.print(tempF);
+  display.println(" *F");
+  display.display();
+  
+  // Log the temperature to Serial Monitor (observation table)
+  Serial.print("Celsius: ");
+  Serial.print(tempC);
+  Serial.print(" *C, Fahrenheit: ");
+  Serial.print(tempF);
+  Serial.println(" *F");
+  
+  // Delay before next reading
+  delay(1000); // Read every second
 }
