@@ -1,29 +1,54 @@
-const int buttonPin = 2;  // Pin connected to the push-button
-const int ledPin = 13;    // Pin connected to the LED
-bool ledState = false;    // Variable to store LED state
-bool buttonState = false; // Variable to store button state
-bool lastButtonState = false;
+#include <TM1637Display.h>  // Include the TM1637 library
+
+// Define the pins connected to the TM1637 module
+#define CLK 3  // Clock pin
+#define DIO 4  // Data pin
+
+// Create an instance of the TM1637Display class
+TM1637Display display(CLK, DIO);
+
+// Define the IR sensor pin
+#define IR_SENSOR_PIN 2  // IR sensor output connected to digital pin 2
+
+// Variable to hold the count of detected objects
+int objectCount = 0;
 
 void setup() {
-  pinMode(buttonPin, INPUT);   // Set button pin as INPUT
-  pinMode(ledPin, OUTPUT);    // Set LED pin as OUTPUT
+  // Initialize the serial communication
+  Serial.begin(9600);
+
+  // Initialize the IR sensor pin
+  pinMode(IR_SENSOR_PIN, INPUT);
+
+  // Initialize the display
+  display.setBrightness(0x0f);  // Set the brightness of the display (0x0f is maximum brightness)
+  
+  // Clear the display initially
+  display.clear();
+  
+  // Print an initial message to the Serial Monitor
+  Serial.println("Object Counter System Initialized.");
 }
 
 void loop() {
-  // Read the current state of the button
-  buttonState = digitalRead(buttonPin);
+  // Read the IR sensor state (LOW when an object is detected)
+  int sensorState = digitalRead(IR_SENSOR_PIN);
 
-  // Check if the button state has changed from LOW to HIGH
-  if (buttonState && !lastButtonState) {
-    // Toggle the LED state
-    ledState = !ledState;
+  // If an object is detected (sensorState is LOW)
+  if (sensorState == LOW) {
+    objectCount++;  // Increment the object count
+    
+    // Print the count to the Serial Monitor
+    Serial.print("Object Detected! Count: ");
+    Serial.println(objectCount);
 
-    // Update the LED
-    digitalWrite(ledPin, ledState);
+    // Display the object count on the 7-segment display
+    display.showNumberDec(objectCount, false);
+
+    // Wait for a short delay to avoid multiple counts for the same object detection
+    delay(500);
   }
 
-  // Save the current button state for comparison in the next loop
-  lastButtonState = buttonState;
-
-  delay(50); // Debounce delay
+  // Small delay to allow stable reading
+  delay(100);
 }
