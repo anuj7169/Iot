@@ -1,22 +1,40 @@
-int ldrPin = A0;  // Define the analog pin for the LDR
+// Define pin numbers
+#define MOISTURE_SENSOR_PIN A0  // Soil moisture sensor connected to analog pin A0
+#define RELAY_PIN 7             // Relay connected to digital pin 7 (controls motor)
+
+// Define soil moisture threshold for watering (adjust according to your sensor)
+#define MOISTURE_THRESHOLD 500  // Below this value, water the plant
 
 void setup() {
-  Serial.begin(9600);  // Start serial communication at 9600 baud rate
+  // Initialize serial communication
+  Serial.begin(9600);
+  
+  // Set relay pin as output
+  pinMode(RELAY_PIN, OUTPUT);
+  
+  // Initialize relay to be off initially
+  digitalWrite(RELAY_PIN, LOW);
 }
 
 void loop() {
-  // Read the raw analog value from the LDR
-  int ldrValue = analogRead(ldrPin);
-
-  // Map the value to a percentage (optional)
-  int lightIntensity = map(ldrValue, 0, 1023, 0, 100);
-
-  // Print the values to the Serial Monitor
-  Serial.print("LDR Value (Raw): ");
-  Serial.print(ldrValue);
-  Serial.print("\tLight Intensity: ");
-  Serial.print(lightIntensity);
-  Serial.println("%");
-
-  delay(500);  // Wait for 500 ms before taking the next reading
+  // Read the soil moisture level
+  int moistureLevel = analogRead(MOISTURE_SENSOR_PIN);
+  
+  // Print the moisture level to the Serial Monitor
+  Serial.print("Soil Moisture Level: ");
+  Serial.println(moistureLevel);
+  
+  // Check if the moisture level is below the threshold
+  if (moistureLevel < MOISTURE_THRESHOLD) {
+    // If the soil is dry, turn on the motor (water the plant)
+    digitalWrite(RELAY_PIN, HIGH);
+    Serial.println("Soil is dry! Turning on water motor.");
+  } else {
+    // If the soil is moist, turn off the motor
+    digitalWrite(RELAY_PIN, LOW);
+    Serial.println("Soil is wet! Turning off water motor.");
+  }
+  
+  // Wait for a moment before the next reading
+  delay(2000); // Delay 2 seconds for stability and to avoid excessive motor switching
 }
