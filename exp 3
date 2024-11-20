@@ -1,63 +1,81 @@
-#include <Wire.h>                  // Include the I2C library
-#include <Adafruit_SSD1306.h>       // Include the OLED display library
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
-#define SCREEN_WIDTH 128            // OLED display width
-#define SCREEN_HEIGHT 64            // OLED display height
+// OLED display dimensions
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
 
-// Set up the OLED display (I2C address 0x3C, 128x64 size)
+// I2C OLED address
+#define OLED_ADDRESS 0x3C
+
+// Initialize the OLED display
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-// Pin for LM35 sensor
-int lm35Pin = A0;
+// LM35 Sensor pin
+const int LM35_PIN = A0;
+
+// Function to read temperature in Celsius
+float readCelsius() {
+  int analogValue = analogRead(LM35_PIN); // Read analog value from LM35
+  float voltage = (analogValue / 1024.0) * 5.0; // Convert analog value to voltage
+  return voltage * 100.0; // Convert voltage to Celsius (10mV per degree Celsius)
+}
+
+// Function to convert Celsius to Fahrenheit
+float celsiusToFahrenheit(float celsius) {
+  return (celsius * 9.0 / 5.0) + 32.0;
+}
 
 void setup() {
-  // Begin serial communication
+  // Initialize serial communication
   Serial.begin(9600);
 
-  // Initialize the OLED display
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;); // Loop forever if display initialization fails
+  // Initialize OLED display
+  if (!display.begin(SSD1306_I2C_ADDRESS, OLED_ADDRESS)) {
+    Serial.println("OLED initialization failed!");
+    while (true); // Stop execution if OLED fails
   }
-  
+
+  // Clear and display initial message
   display.clearDisplay();
-  display.setTextSize(1);          // Set text size
-  display.setTextColor(SSD1306_WHITE); // Set text color to white
-  display.setCursor(0, 0);        // Set the cursor position on the display
-  display.print("Temperature: ");
-  display.display();              // Show the text on the display
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+  display.println("Temp Logger System");
+  display.display();
+  delay(2000);
 }
 
 void loop() {
-  // Read the sensor value from the LM35
-  int sensorValue = analogRead(lm35Pin);
+  // Read temperature in Celsius
+  float tempC = readCelsius();
+  // Convert to Fahrenheit
+  float tempF = celsiusToFahrenheit(tempC);
 
-  // Convert the sensor value to voltage
-  float voltage = (sensorValue * 5.0) / 1024.0;
-
-  // Convert voltage to temperature in Celsius (LM35: 1V = 10°C)
-  float temperatureC = voltage * 100;
-
-  // Optionally, convert Celsius to Fahrenheit
-  float temperatureF = (temperatureC * 9.0) / 5.0 + 32;
-
-  // Print the temperature to the Serial Monitor
-  Serial.print("Temperature: ");
-  Serial.print(temperatureC);
-  Serial.print(" C, ");
-  Serial.print(temperatureF);
-  Serial.println(" F");
-
-  // Display the temperature on the OLED display
+  // Display temperature on OLED
   display.clearDisplay();
-  display.setCursor(0, 0);        // Reset the cursor position
-  display.print("Temp: ");
-  display.print(temperatureC);
-  display.print(" C");
-
-  // Update the OLED display
+  display.setTextSize(1);
+  display.setCursor(0, 0);
+  display.println("Temperature Readings:");
+  display.setTextSize(2);
+  display.setCursor(0, 20);
+  display.print("C: ");
+  display.print(tempC);
+  display.println(" C");
+  display.setCursor(0, 40);
+  display.print("F: ");
+  display.print(tempF);
+  display.println(" F");
   display.display();
 
-  // Wait for 1 second before the next reading
+  // Log readings to Serial Monitor
+  Serial.print("Celsius: ");
+  Serial.print(tempC);
+  Serial.print(" C, Fahrenheit: ");
+  Serial.print(tempF);
+  Serial.println(" F");
+
+  // Delay before next reading (1 second)
   delay(1000);
 }
