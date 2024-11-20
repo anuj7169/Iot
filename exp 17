@@ -1,0 +1,96 @@
+sudo pip3 install Flask RPi.GPIO
+from flask import Flask, render_template, redirect, url_for
+import RPi.GPIO as GPIO
+
+# Set up the Flask application
+app = Flask(__name__)
+
+# Set up GPIO
+GPIO.setmode(GPIO.BCM)  # Using Broadcom pin numbering
+GPIO.setwarnings(False)
+
+# Define GPIO pins for LEDs or Relays (example: GPIO 17 and GPIO 27)
+LED_PIN_1 = 17
+LED_PIN_2 = 27
+
+# Set up GPIO pins as outputs
+GPIO.setup(LED_PIN_1, GPIO.OUT)
+GPIO.setup(LED_PIN_2, GPIO.OUT)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/turn_on_led1')
+def turn_on_led1():
+    GPIO.output(LED_PIN_1, GPIO.HIGH)
+    return redirect(url_for('index'))
+
+@app.route('/turn_off_led1')
+def turn_off_led1():
+    GPIO.output(LED_PIN_1, GPIO.LOW)
+    return redirect(url_for('index'))
+
+@app.route('/turn_on_led2')
+def turn_on_led2():
+    GPIO.output(LED_PIN_2, GPIO.HIGH)
+    return redirect(url_for('index'))
+
+@app.route('/turn_off_led2')
+def turn_off_led2():
+    GPIO.output(LED_PIN_2, GPIO.LOW)
+    return redirect(url_for('index'))
+
+# Run the web server
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPIO Control Web Server</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding-top: 50px;
+        }
+        .btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .btn-off {
+            background-color: #f44336;
+        }
+        h1 {
+            font-size: 36px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Control GPIO Devices</h1>
+
+    <!-- Control LED 1 -->
+    <h2>LED 1</h2>
+    <button class="btn" onclick="window.location.href='/turn_on_led1'">Turn On</button>
+    <button class="btn btn-off" onclick="window.location.href='/turn_off_led1'">Turn Off</button>
+
+    <!-- Control LED 2 -->
+    <h2>LED 2</h2>
+    <button class="btn" onclick="window.location.href='/turn_on_led2'">Turn On</button>
+    <button class="btn btn-off" onclick="window.location.href='/turn_off_led2'">Turn Off</button>
+    
+</body>
+</html>
