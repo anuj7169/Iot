@@ -1,46 +1,106 @@
-// Define ULN2003 input pins
-const int IN1 = 8;
-const int IN2 = 9;
-const int IN3 = 10;
-const int IN4 = 11;
+#include "esp_camera.h"
+#include <WiFi.h>
 
-// Step sequence for 4-step control
-int stepSequence[4][4] = {
-  {1, 0, 0, 0},
-  {0, 1, 0, 0},
-  {0, 0, 1, 0},
-  {0, 0, 0, 1}
-};
+// Define the camera settings
+#define CAMERA_MODEL_AI_THINKER // ESP32-CAM AI Thinker model
+#include "camera_pins.h" // Contains the necessary pin definitions for the ESP32-CAM
+
+// Wi-Fi credentials
+const char* ssid = "Your_SSID";
+const char* password = "Your_PASSWORD";
+
+// Initialize camera configurations
+camera_config_t config;
+bool faceDetected = false;
+
+// Face recognition data (dummy example for simplicity)
+const String knownFaces[] = {"Alice", "Bob"};
+const String unknownFace = "Unknown";
+
+// Setup Wi-Fi connection
+void setup_wifi() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to Wi-Fi");
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println();
+  Serial.println("Connected to Wi-Fi!");
+  Serial.println("IP Address: " + WiFi.localIP().toString());
+}
+
+// Initialize the camera
+void init_camera() {
+  config.ledc_channel = LEDC_CHANNEL_0;
+  config.ledc_timer = LEDC_TIMER_0;
+  config.pin_d0 = 16;
+  config.pin_d1 = 5;
+  config.pin_d2 = 4;
+  config.pin_d3 = 0;
+  config.pin_d4 = 2;
+  config.pin_d5 = 14;
+  config.pin_d6 = 12;
+  config.pin_d7 = 13;
+  config.pin_xclk = 21;
+  config.pin_pclk = 22;
+  config.pin_vsync = 25;
+  config.pin_href = 23;
+  config.pin_sdda = 26;
+  config.pin_scl = 27;
+  config.pin_pwdn = 32;
+  config.pin_reset = -1;
+  config.xclk_freq_hz = 20000000;
+  config.pixel_format = PIXFORMAT_JPEG;
+  config.frame_size = FRAMESIZE_VGA;
+  config.jpeg_quality = 12;
+  config.fb_count = 2;
+
+  // Initialize camera
+  esp_err_t err = esp_camera_init(&config);
+  if (err != ESP_OK) {
+    Serial.println("Camera initialization failed!");
+    return;
+  }
+  Serial.println("Camera initialized!");
+}
+
+// Capture a photo and detect a face
+String capture_face() {
+  camera_fb_t *fb = NULL;
+  String recognizedFace = unknownFace;
+
+  // Capture a photo
+  fb = esp_camera_fb_get();
+  if (!fb) {
+    Serial.println("Camera capture failed!");
+    return recognizedFace;
+  }
+
+  // Process the image (face detection logic should be added here)
+  // For the sake of this example, we will simulate face detection.
+
+  // Simulating a basic face detection (replace with real detection logic)
+  if (fb->len > 1000) {
+    recognizedFace = knownFaces[random(0, 2)];  // Simulate detecting Alice or Bob
+  }
+
+  esp_camera_fb_return(fb);
+  return recognizedFace;
+}
 
 void setup() {
-  // Set all ULN2003 input pins as OUTPUT
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
+  Serial.begin(115200);
+  setup_wifi();
+  init_camera();
+  randomSeed(analogRead(0));  // Initialize random number generator for face simulation
 }
 
 void loop() {
-  // Rotate stepper motor clockwise
-  for (int i = 0; i < 50; i++) { // Number of steps
-    stepMotor(true); // Clockwise
-  }
-  delay(1000); // Wait 1 second
-  
-  // Rotate stepper motor counterclockwise
-  for (int i = 0; i < 50; i++) { // Number of steps
-    stepMotor(false); // Counterclockwise
-  }
-  delay(1000); // Wait 1 second
-}
-
-void stepMotor(bool clockwise) {
-  for (int step = 0; step < 4; step++) {
-    int index = clockwise ? step : (3 - step); // Reverse sequence for CCW
-    digitalWrite(IN1, stepSequence[index][0]);
-    digitalWrite(IN2, stepSequence[index][1]);
-    digitalWrite(IN3, stepSequence[index][2]);
-    digitalWrite(IN4, stepSequence[index][3]);
-    delay(10); // Delay between steps (controls speed)
-  }
+  String detectedFace = capture_face();
+  Serial.println("Face detected: " + detectedFace);
+  delay(2000);  // Wait for 2 seconds before the next capture
 }
