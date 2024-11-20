@@ -1,0 +1,22 @@
+int ldrPin = A0;  // Define the analog pin for the LDR
+
+void setup() {
+  Serial.begin(9600);  // Start serial communication at 9600 baud rate
+}
+
+void loop() {
+  // Read the raw analog value from the LDR
+  int ldrValue = analogRead(ldrPin);
+
+  // Map the value to a percentage (optional)
+  int lightIntensity = map(ldrValue, 0, 1023, 0, 100);
+
+  // Print the values to the Serial Monitor
+  Serial.print("LDR Value (Raw): ");
+  Serial.print(ldrValue);
+  Serial.print("\tLight Intensity: ");
+  Serial.print(lightIntensity);
+  Serial.println("%");
+
+  delay(500);  // Wait for 500 ms before taking the next reading
+}
