@@ -1,19 +1,36 @@
-int buzzerPin = 9;  // Pin connected to the piezo buzzer
+// Define the pins
+#define PIR_SENSOR_PIN 2    // PIR sensor connected to digital pin 2
+#define LED_PIN 13          // LED connected to digital pin 13
 
 void setup() {
-  pinMode(buzzerPin, OUTPUT);  // Set the buzzer pin as OUTPUT
+  // Initialize the PIR sensor pin as input
+  pinMode(PIR_SENSOR_PIN, INPUT);
+  
+  // Initialize the LED pin as output
+  pinMode(LED_PIN, OUTPUT);
+
+  // Start serial communication for debugging
+  Serial.begin(9600);
 }
 
 void loop() {
-  // Play a tone at 500 Hz for 1 second
-  tone(buzzerPin, 500, 1000);
-  delay(1000);  // Wait for 1 second
+  // Read the state of the PIR sensor
+  int motionDetected = digitalRead(PIR_SENSOR_PIN);
 
-  // Play a tone at 1000 Hz for 1 second
-  tone(buzzerPin, 1000, 1000);
-  delay(1000);  // Wait for 1 second
+  if (motionDetected == HIGH) {  // If motion is detected
+    // Turn on the LED
+    digitalWrite(LED_PIN, HIGH);
 
-  // Stop the buzzer for 1 second
-  noTone(buzzerPin);
-  delay(1000);
+    // Print message to the serial monitor
+    Serial.println("Motion Detected! LED ON.");
+  } else {  // If no motion is detected
+    // Turn off the LED
+    digitalWrite(LED_PIN, LOW);
+
+    // Print message to the serial monitor
+    Serial.println("No Motion Detected. LED OFF.");
+  }
+
+  // Small delay to avoid overwhelming the serial monitor with data
+  delay(500);
 }
