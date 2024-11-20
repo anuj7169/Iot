@@ -1,0 +1,19 @@
+int buzzerPin = 9;  // Pin connected to the piezo buzzer
+
+void setup() {
+  pinMode(buzzerPin, OUTPUT);  // Set the buzzer pin as OUTPUT
+}
+
+void loop() {
+  // Play a tone at 500 Hz for 1 second
+  tone(buzzerPin, 500, 1000);
+  delay(1000);  // Wait for 1 second
+
+  // Play a tone at 1000 Hz for 1 second
+  tone(buzzerPin, 1000, 1000);
+  delay(1000);  // Wait for 1 second
+
+  // Stop the buzzer for 1 second
+  noTone(buzzerPin);
+  delay(1000);
+}
