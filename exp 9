@@ -1,0 +1,37 @@
+// Define the segment pins for a common cathode 7-segment display
+const int segmentPins[] = {2, 3, 4, 5, 6, 7, 8};  // A-G pins
+
+// Digit mapping: {A, B, C, D, E, F, G}
+const byte digitMap[10] = {
+  0b1111110, // 0
+  0b0110000, // 1
+  0b1101101, // 2
+  0b1111001, // 3
+  0b0110011, // 4
+  0b1011011, // 5
+  0b1011111, // 6
+  0b1110000, // 7
+  0b1111111, // 8
+  0b1111011  // 9
+};
+
+void setup() {
+  // Set all segment pins as OUTPUT
+  for (int i = 0; i < 7; i++) {
+    pinMode(segmentPins[i], OUTPUT);
+  }
+}
+
+void loop() {
+  for (int digit = 0; digit < 10; digit++) {
+    displayDigit(digit);  // Display each digit
+    delay(1000);          // Hold the digit for 1 second
+  }
+}
+
+void displayDigit(int digit) {
+  for (int i = 0; i < 7; i++) {
+    // Write HIGH or LOW to each segment pin based on the digit map
+    digitalWrite(segmentPins[i], bitRead(digitMap[digit], 6 - i));
+  }
+}
