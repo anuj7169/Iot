@@ -1,0 +1,29 @@
+const int buttonPin = 2;  // Pin connected to the push-button
+const int ledPin = 13;    // Pin connected to the LED
+bool ledState = false;    // Variable to store LED state
+bool buttonState = false; // Variable to store button state
+bool lastButtonState = false;
+
+void setup() {
+  pinMode(buttonPin, INPUT);   // Set button pin as INPUT
+  pinMode(ledPin, OUTPUT);    // Set LED pin as OUTPUT
+}
+
+void loop() {
+  // Read the current state of the button
+  buttonState = digitalRead(buttonPin);
+
+  // Check if the button state has changed from LOW to HIGH
+  if (buttonState && !lastButtonState) {
+    // Toggle the LED state
+    ledState = !ledState;
+
+    // Update the LED
+    digitalWrite(ledPin, ledState);
+  }
+
+  // Save the current button state for comparison in the next loop
+  lastButtonState = buttonState;
+
+  delay(50); // Debounce delay
+}
