@@ -1,37 +1,64 @@
-// Define the segment pins for a common cathode 7-segment display
-const int segmentPins[] = {2, 3, 4, 5, 6, 7, 8};  // A-G pins
+// Define LED pins for North-South direction
+#define NS_RED 2
+#define NS_YELLOW 3
+#define NS_GREEN 4
 
-// Digit mapping: {A, B, C, D, E, F, G}
-const byte digitMap[10] = {
-  0b1111110, // 0
-  0b0110000, // 1
-  0b1101101, // 2
-  0b1111001, // 3
-  0b0110011, // 4
-  0b1011011, // 5
-  0b1011111, // 6
-  0b1110000, // 7
-  0b1111111, // 8
-  0b1111011  // 9
-};
+// Define LED pins for East-West direction
+#define EW_RED 5
+#define EW_YELLOW 6
+#define EW_GREEN 7
+
+// Time intervals (in milliseconds)
+#define NS_GREEN_TIME 5000       // North-South Green light duration (5 seconds)
+#define EW_GREEN_TIME 5000       // East-West Green light duration (5 seconds)
+#define YELLOW_TIME 2000         // Yellow light duration (2 seconds)
 
 void setup() {
-  // Set all segment pins as OUTPUT
-  for (int i = 0; i < 7; i++) {
-    pinMode(segmentPins[i], OUTPUT);
-  }
+  // Set all the LEDs as OUTPUT
+  pinMode(NS_RED, OUTPUT);
+  pinMode(NS_YELLOW, OUTPUT);
+  pinMode(NS_GREEN, OUTPUT);
+  pinMode(EW_RED, OUTPUT);
+  pinMode(EW_YELLOW, OUTPUT);
+  pinMode(EW_GREEN, OUTPUT);
+
+  // Start with all lights off
+  digitalWrite(NS_RED, LOW);
+  digitalWrite(NS_YELLOW, LOW);
+  digitalWrite(NS_GREEN, LOW);
+  digitalWrite(EW_RED, LOW);
+  digitalWrite(EW_YELLOW, LOW);
+  digitalWrite(EW_GREEN, LOW);
 }
 
 void loop() {
-  for (int digit = 0; digit < 10; digit++) {
-    displayDigit(digit);  // Display each digit
-    delay(1000);          // Hold the digit for 1 second
-  }
-}
-
-void displayDigit(int digit) {
-  for (int i = 0; i < 7; i++) {
-    // Write HIGH or LOW to each segment pin based on the digit map
-    digitalWrite(segmentPins[i], bitRead(digitMap[digit], 6 - i));
-  }
+  // Phase 1: North-South Green, East-West Red
+  digitalWrite(NS_GREEN, HIGH);
+  digitalWrite(EW_RED, HIGH);
+  delay(NS_GREEN_TIME);  // Keep North-South Green for 5 seconds
+  
+  // Phase 2: North-South Yellow, East-West Red
+  digitalWrite(NS_GREEN, LOW);
+  digitalWrite(NS_YELLOW, HIGH);
+  delay(YELLOW_TIME);  // Keep North-South Yellow for 2 seconds
+  
+  // Phase 3: North-South Red, East-West Red
+  digitalWrite(NS_YELLOW, LOW);
+  digitalWrite(NS_RED, HIGH);
+  delay(500);  // Short delay to avoid sudden switching
+  
+  // Phase 4: East-West Green, North-South Red
+  digitalWrite(EW_GREEN, HIGH);
+  digitalWrite(NS_RED, HIGH);
+  delay(EW_GREEN_TIME);  // Keep East-West Green for 5 seconds
+  
+  // Phase 5: East-West Yellow, North-South Red
+  digitalWrite(EW_GREEN, LOW);
+  digitalWrite(EW_YELLOW, HIGH);
+  delay(YELLOW_TIME);  // Keep East-West Yellow for 2 seconds
+  
+  // Phase 6: East-West Red, North-South Red
+  digitalWrite(EW_YELLOW, LOW);
+  digitalWrite(EW_RED, HIGH);
+  delay(500);  // Short delay to avoid sudden switching
 }
